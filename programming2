@@ -1,0 +1,55 @@
+"use strict";
+
+const readline = require("readline");
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+const values = [];
+
+console.log("Enter integers one per line. Type 'q' or 'Q' to finish.");
+
+function ask() {
+  rl.question("> ", (raw) => {
+    const s = raw.trim();
+    if (s.toLowerCase() === "q") {
+      rl.close();
+      return;
+    }
+    if (!/^[-+]?\d+$/.test(s)) {
+      console.log("Invalid entry. Please enter an integer or 'q' to quit.");
+      ask();
+      return;
+    }
+    values.push(parseInt(s, 10));
+    ask();
+  });
+}
+
+function checkCondition(nums) {
+  if (nums.length < 3) return { met: false };
+  const freq = new Map();
+  for (const x of nums) freq.set(x, (freq.get(x) || 0) + 1);
+  for (let i = 0; i < nums.length; i++) {
+    for (let j = i + 1; j < nums.length; j++) {
+      const a = nums[i];
+      const b = nums[j];
+      const p = a * b;
+      if (!freq.has(p)) continue;
+      let available = freq.get(p);
+      if (p === a) available -= 1;
+      if (p === b) available -= 1;
+      if (available >= 1) return { met: true, a, b, c: p };
+    }
+  }
+  return { met: false };
+}
+
+rl.on("close", () => {
+  console.log("\nYou entered:", values.join(", "));
+  const res = checkCondition(values);
+  if (res.met) {
+    console.log(`Condition is met: ${res.a} x ${res.b} = ${res.c}`);
+  } else {
+    console.log("Condition was not met");
+  }
+});
+
+ask();
